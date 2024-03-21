@@ -1,164 +1,65 @@
-// import React from 'react';
-// import { shallow } from 'enzyme';
-// import { AddDepModal } from './AddDepModal';
+import React from 'react';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
+import { AddDepModal } from './AddDepModal';
 
-// describe('AddDepModal Component', () => {
-//   let wrapper;
-//   const onHideMock = jest.fn();
-  
-//   beforeEach(() => {
-//     // Render the AddDepModal component with the provided onHide prop
-//     wrapper = shallow(<AddDepModal onHide={onHideMock} />);
-//     global.alert = jest.fn();
-//   });
 
-  
-//   afterEach(() => {
-//     global.alert.mockClear();
-//   });
+describe('AddDepModal Component', () => {
 
-//   it('renders without crashing', () => {
-//     expect(wrapper.exists()).toBeTruthy();
-//   });
+  beforeEach(() => {
+    global.fetch = jest.fn(); // Mock fetch function
+});
 
-//   it('displays the modal header correctly', () => {
-//     // Assert that the modal title is rendered correctly
-//     expect(wrapper.find('ModalTitle').childAt(0).text()).toEqual('Add Department');
-//   });
+afterEach(() => {
+    jest.restoreAllMocks(); // Restore mock after each test
+});
 
-//   it('renders the modal body correctly', () => {
-//     // Assert that the modal body is rendered
-//     expect(wrapper.find('ModalBody').exists()).toBeTruthy();
-//   });
+    it('renders modal with correct title', () => {
+        const onHide = jest.fn();
+        render(<AddDepModal show={true} onHide={onHide} />);
+        expect(screen.getByTestId('addDepModal')).toBeInTheDocument();
+        const addDepartmentElements = screen.getAllByText('Add Department');
+        expect(addDepartmentElements.length).toBeGreaterThan(0);
+      });
+    //////////////////
+    it('closes modal when close button is clicked', () => {
+      const onHide = jest.fn();
+      render(<AddDepModal show={true} onHide={onHide} />);
 
-//   it('renders the modal footer correctly', () => {
-//     // Assert that the modal footer is rendered
-//     expect(wrapper.find('ModalFooter').exists()).toBeTruthy();
-//   });
+      fireEvent.click(screen.getByText('Close'));
 
-//   it('displays the Add Department button with correct text', () => {
-//     // Assert that the Add Department button is rendered
-//     expect(wrapper.find('Button[variant="primary"]').exists()).toBeTruthy();
-    
-//     // Assert that the button text is correct
-//     expect(wrapper.find('Button[variant="primary"]').text()).toEqual('Add Department');
-//   });
+      expect(onHide).toHaveBeenCalled();
+  });
+  ///////////
 
-//   it('contains a form with DepartmentName input field', () => {
-//     // Assert that the form is rendered
-//     expect(wrapper.find('Form')).toHaveLength(1);
 
-//     // Assert that the DepartmentName input field is rendered
-//     expect(wrapper.find('Form').exists()).toBeTruthy();
-//   });
 
-//   it('calls onHide when the Close button is clicked', () => {
-//     // Simulate a click on the Close button
-//     wrapper.find('Button[variant="danger"]').simulate('click');
+it('displays error message when department submission fails', async () => {
+  const onHide = jest.fn();
+  render(<AddDepModal show={true} onHide={onHide} />);
 
-//     // Assert that onHide function is called
-//     expect(onHideMock).toHaveBeenCalled();
-//   });
+  fetch.mockRejectedValueOnce(new Error('Failed to add department'));
 
-//   it('calls handleSubmit when the form is submitted', () => {
-//     // Mock the handleSubmit function
-//     const handleSubmitMock = jest.fn();
-    
-//     // Render the component with handleSubmitMock as a prop
-//     const wrapper = shallow(<AddDepModal onHide={jest.fn()} handleSubmit={handleSubmitMock} />);
-    
-//     // Simulate form submission with a mock event object
-//     const eventMock = {
-//       preventDefault: jest.fn(),
-//       target: {
-//         DepartmentName: { value: 'Test Department' }
-//       }
-//     };
-//     wrapper.find('Form').prop('onSubmit')(eventMock);
-    
-//     // Assert that handleSubmit function was called
-//     expect(handleSubmitMock).toBeTruthy();
-//   });
+  fireEvent.change(screen.getByLabelText('DepartmentName'), { target: { value: 'Test Department' } });
+  fireEvent.submit(screen.getByTestId('addDepForm'));
 
-//   it('does not call handleSubmit with invalid input', () => {
-//     // Mock the handleSubmit function
-//     const handleSubmitMock = jest.fn();
-    
-//     // Render the component with handleSubmitMock as a prop
-//     const wrapper = shallow(<AddDepModal onHide={jest.fn()} handleSubmit={handleSubmitMock} />);
-    
-//     // Simulate form submission with invalid input
-//     const eventMock = {
-//       preventDefault: jest.fn(),
-//       target: {
-//         DepartmentName: { value: '' } // Empty input, which is invalid
-//       }
-//     };
-//     wrapper.find('Form').prop('onSubmit')(eventMock);
-    
-//     // Assert that handleSubmit function was not called (form should not submit with invalid input)
-//     expect(handleSubmitMock).not.toHaveBeenCalled();
-//   });
-  
-  
-//   it('displays error message for invalid input', () => {
-//     // Mock the handleSubmit function
-//     const handleSubmitMock = jest.fn();
-    
-//     // Render the component with handleSubmitMock as a prop
-//     const wrapper = shallow(<AddDepModal onHide={jest.fn()} handleSubmit={handleSubmitMock} />);
-    
-//     // Simulate form submission with invalid input
-//     const eventMock = {
-//       preventDefault: jest.fn(),
-//       target: {
-//         DepartmentName: { value: '' } // Empty input, which is invalid
-//       }
-//     };
-//     wrapper.find('Form').prop('onSubmit')(eventMock);
-    
-//     // Assert that handleSubmit function was not called (form should not submit with invalid input)
-//     expect(handleSubmitMock).not.toHaveBeenCalled();
-//   });
-  
-  
-//   it('handles API request and response properly', async () => {
-//     // Mock fetch API
-//     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-//       json: jest.fn().mockResolvedValueOnce({ success: true }) // Simulate successful API response
-//     });
-    
-//     // Mock the handleSubmit function
-//     const handleSubmitMock = jest.fn();
-    
-//     // Render the component with handleSubmitMock as a prop
-//     const wrapper = shallow(<AddDepModal onHide={jest.fn()} handleSubmit={handleSubmitMock} />);
-    
-//     // Simulate form submission with valid input
-//     const eventMock = {
-//       preventDefault: jest.fn(),
-//       target: {
-//         DepartmentName: { value: 'Test Department' }
-//       }
-//     };
-//     await wrapper.find('Form').simulate('submit', eventMock);
-    
-//     // Assert that fetch API was called with correct parameters
-//     expect(fetchMock).toHaveBeenCalledWith(
-//       expect.stringContaining(process.env.REACT_APP_API + 'department'), // Ensure correct API endpoint is called
-//       expect.objectContaining({
-//         method: 'POST',
-//         body: JSON.stringify({ DepartmentId: null, DepartmentName: 'Test Department' }) // Ensure correct request body
-//       })
-//     );
-//     // Assert that handleSubmit function was called
-//     expect(handleSubmitMock).toBeTruthy();
-//     // Restore fetch mock
-//     fetchMock.mockRestore();
-//   });
+  await waitFor(() => {
+      expect(screen.getByTestId('error-message')).toHaveTextContent('Failed to add department');
+  });
+});
 
-  
-  
-  
-  
-// });
+
+
+it('displays error message when department name is empty upon submission', async () => {
+  const onHide = jest.fn();
+  render(<AddDepModal show={true} onHide={onHide} />);
+
+  fireEvent.submit(screen.getByTestId('addDepForm'));
+
+  await waitFor(() => {
+      expect(screen.getByTestId('error-message')).toHaveTextContent('Department name is required');
+  });
+});
+
+
+});
