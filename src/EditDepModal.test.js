@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect'; // For expect.extend
+import '@testing-library/jest-dom/extend-expect'; 
 
 import { EditDepModal } from './EditDepModal';
 
@@ -68,12 +68,4 @@ describe('EditDepModal Component', () => {
 
 
 });
-
-
-
-
-
-  
-  
-  
 
